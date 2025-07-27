@@ -76,17 +76,7 @@ bash
 
 🧠 Script Logic
 
-#!/bin/bash
-# Get the current idle CPU percentage
-idle=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}')
-busy=$(echo "100 - $idle" | bc)
-
-# Log alert if CPU usage is too high
-if (( $(echo "$busy > 80" | bc -l) )); then
-  echo "⚠️ Warning: High CPU Usage - ${busy}% busy" | tee -a ~/cpu_alert.log
-else
-  echo "✅ CPU usage is normal: ${busy}% busy"
-fi
+```bash #!/bin/bash # Get the current idle CPU percent idle=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}') busy=$(echo "100 - $idle" | bc) # Log alert if CPU usage is too high if (( $(echo "$busy > 80" | bc -l) )); then echo "⚠️ Warning: High CPU Usage - ${busy}% busy" else echo "✅ CPU usage is normal: ${busy}% busy" fi ``` </pre>
 
 📊 Benchmark Summary
 
