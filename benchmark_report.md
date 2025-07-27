@@ -44,3 +44,44 @@ Cleanup:
 sudo umount /mnt/inode_test
 sudo rm -rf /mnt/inode_test
 rm /tmp/inode_test.img
+🧾 Filesystem Health & Quota Simulation Report
+📘 Scenario
+Simulate inode exhaustion and enforce user-level quotas to better understand how storage limitations affect system behavior, especially in shared environments.
+🛠️ Setup Overview
+1. Created a 100MB loopback device:
+bash
+fallocate -l 100M /tmp/quota_test.img
+2. Formatted with ext4 and limited inodes:
+bash
+mkfs.ext4 -N 512 -O quota /tmp/quota_test.img
+3. Mounted with usrquota option:
+bash
+sudo mount -o loop,usrquota /tmp/quota_test.img /mnt/quota_test
+4. Verified mount and file system support:
+bash
+mount | grep quota_test
+🧪 Inode Exhaustion Simulation
+Created many small files until the inode limit was reached:
+bash
+for i in {1..600}; do touch /mnt/quota_test/file_$i; done
+✅ Result: Inodes were exhausted before storage capacity ran out, demonstrating that file count limits can be just as critical as disk size.
+
+📏 User Quota Enforcement
+Enabled quota support:
+bash
+sudo quotacheck -cum /mnt/quota_test
+Attempted to enable quotas:
+bash
+sudo quotaon /mnt/quota_test
+Verified active quotas:
+bash
+sudo repquota /mnt/quota_test
+
+📉 Report Output:
+User root had a soft limit of 2 files, which was hit during testing.
+Block grace and inode grace time were both set to 7 days by default.
+
+🔍 Key Takeaways
+Inode limits are easy to hit in file-heavy environments, even if disk space remains.
+User quotas are essential for managing fair usage across shared systems.
+Quota setup requires explicit support during formatting (-O quota) and correct mount options.
