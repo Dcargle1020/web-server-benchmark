@@ -85,3 +85,63 @@ Block grace and inode grace time were both set to 7 days by default.
 Inode limits are easy to hit in file-heavy environments, even if disk space remains.
 User quotas are essential for managing fair usage across shared systems.
 Quota setup requires explicit support during formatting (-O quota) and correct mount options.
+ ICMP Block Simulation Benchmark Report
+
+**Project Title:** ICMP Echo Request Blocking using `sysctl` and `firewalld`  
+**Date:** July 27, 2025  
+**Test Engineer:** Dominique Cargle  
+**Environment:** Ubuntu on EC2 instance (Amazon Linux 2 VM)  
+**Firewall Manager:** `firewalld`  
+**Network Tool Used:** `ping` (ICMP echo requests)  
+
+---
+## scenario
+To validate whether blocking ICMP echo requests via `firewalld` and/or `sysctl` effectively prevents the instance from receiving and responding to ping traffic. Additionally, to explore zone-level blocking using `firewalld` and test inversion functionality.
+
+---
+## Methodology
+
+### Baseline Test
+
+| Action                     | Expected Outcome         | Actual Outcome          |
+|---------------------------|--------------------------|--------------------------|
+| `ping -c 3 <instance>`     | 3 packets transmitted     | 3 received, 0% loss       |
+| Firewall baseline rules    | Allow ICMP traffic       | Confirmed enabled         |
+
+### Attempted Blocking via `firewalld`
+
+| Command                                                                 | Result              | Ping Response |
+|-------------------------------------------------------------------------|---------------------|---------------|
+| `sudo firewall-cmd --add-icmp-block=echo-request`                      | Success/Warning     | Ping **succeeded** |
+| `sudo firewall-cmd --reload`                                           | Success             | Ping **succeeded** |
+| `sudo firewall-cmd --zone=public --change-interface=eth-test`         | Success             | Ping **succeeded** |
+| `sudo firewall-cmd --zone=public --add-icmp-block-inversion`          | Success             | Ping **succeeded** |
+
+### `sysctl` Attempt (Not run due to restrictions on instructor's shell)
+
+| Command                                      | Status       | Comment |
+|---------------------------------------------|--------------|---------|
+| `echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all` | *Not Executed* | Needs instructor permission |
+---
+## Observations
+
+- **Ping test consistently passed** despite rules being applied successfully, suggesting either:  
+  a) The `firewalld` rules were not applied to the correct interface/zone  
+  b) Additional `sysctl` or lower-level kernel configs override the block  
+  c) The test environment (instructor’s shell) may have limited permissions  
+
+- **Firewall zones** showed `public (default)`, but additional interface configurations (like `eth0`) may require separate handling or zone assignment.
+
+- **`icmp-block-inversion`** command was accepted, but did not produce observable behavior changes.
+---
+## Conclusion
+
+The instance did not successfully block ICMP echo requests during the project window. All firewall rules were applied and verified, but no impact was observed. Additional steps (e.g., validating the interface-zone mapping or trying the same on a personal EC2 instance) are needed for full isolation and successful blocking.
+---
+## Next Steps
+
+- [ ] Replicate this setup on a personal EC2 instance with full control  
+- [ ] Retry `sysctl` commands directly on the VM  
+- [ ] Consider using `iptables` or `nftables` for more granular control  
+- [ ] Capture Wireshark or tcpdump traces to verify incoming ICMP behavior  
+- [ ] Document working solution in updated report
