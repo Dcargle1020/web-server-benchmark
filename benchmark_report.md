@@ -145,3 +145,4 @@ The instance did not successfully block ICMP echo requests during the project wi
 - [ ] Consider using `iptables` or `nftables` for more granular control  
 - [ ] Capture Wireshark or tcpdump traces to verify incoming ICMP behavior  
 - [ ] Document working solution in updated report
+
