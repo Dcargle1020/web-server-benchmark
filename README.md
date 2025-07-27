@@ -27,4 +27,14 @@ The benchmark evaluates:
 - CPU efficiency under curl-based load
 - Ease of configuration
 
-> This lab was completed on an AWS EC2 instance running Ubuntu 24.04.
+> ### Filesystem Health & Quota Simulation
+
+Simulated low-inode exhaustion and user quota enforcement:
+
+- Created a loop device and formatted with `ext4` (with limited inodes)
+- Mounted with `usrquota` and verified quota support
+- Used `touch` in a loop to hit inode exhaustion
+- Enabled user quotas with `quotacheck`, `repquota`
+- Verified enforcement via quota report
+- > This lab was completed on an AWS EC2 instance running Ubuntu 24.04.
+Tools: `fallocate`, `mkfs.ext4`, `mount`, `df -i`, `quotacheck`, `repquota`
